@@ -9,6 +9,7 @@ A powerful Blender addon for saving and restoring complete scene states includin
 - **Full visibility support** including Eye-Button visibility (`hide_set()`)
 - **Viewport and render visibility** preservation
 - **Automatic state management** with active state tracking
+- **Bone pose support** for armatures in Pose Mode (NEW!)
 
 ### ✅ Native Blender UI Integration
 - **Native Blender UIList** with professional blue selection bars
@@ -47,6 +48,13 @@ A powerful Blender addon for saving and restoring complete scene states includin
 - **Delete**: Remove a state permanently (with confirmation dialog)
 - **Auto-refresh**: List updates automatically after operations
 
+### Working with Armatures
+1. **Set up your armature** with desired bone poses in Pose Mode
+2. **Save the state** - bone transformations are automatically captured
+3. **Change bone poses** or switch to different armature configurations
+4. **Load the saved state** - all bone poses are restored exactly
+5. **Supports all rotation modes** - XYZ, XZY, YXZ, YZX, ZXY, ZYX, and Quaternion
+
 ## 🔧 Technical Details
 
 ### Supported Data
@@ -54,6 +62,10 @@ A powerful Blender addon for saving and restoring complete scene states includin
 - **Viewport Visibility**: `hide_viewport` property
 - **Render Visibility**: `hide_render` property  
 - **Eye-Button Visibility**: `hide_set()` status (complete visibility control)
+- **Bone Poses**: Armature bone transformations in Pose Mode
+  - Location, rotation, and scale for all bones
+  - Support for both Euler and Quaternion rotation modes
+  - Automatic rotation mode detection and conversion
 
 ### File Structure
 States are saved as JSON files alongside your .blend file:
