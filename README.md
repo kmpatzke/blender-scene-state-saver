@@ -86,35 +86,9 @@ The addon provides a clean, native Blender interface:
 └────────────────────┘
 ```
 
-## 🛠️ Development
-
-### Architecture
-- **Modular design** with separated concerns
-- **FileManager**: Handles file operations and paths
-- **DataHandler**: JSON serialization and validation
-- **ObjectCapture**: Scene data capture and application
-- **StateManager**: Central coordination of operations
-
-### Key Features
-- **Native UIList implementation** with `template_list()`
-- **Complete visibility tracking** including `hide_set()` status
-- **Automatic viewport updates** after state changes
-- **Error handling** with user-friendly messages
-- **Performance warnings** for large scenes
-
-## 📝 Version History
-
-### v1.0.0 - Complete Rewrite
-- ✅ Native Blender UIList with professional blue selection bars
-- ✅ Full Eye-Button visibility support (`hide_set()` status)
-- ✅ Automatic active state management
-- ✅ All operations tested and working (Load/Update/Delete/Save)
-- ✅ No more Blender errors or UI issues
-- ✅ Professional user experience matching Blender standards
-
 ## 🤝 Contributing
 
-This is a focused, single-file plugin designed for simplicity and reliability. The codebase is well-documented and modular for easy maintenance.
+Contributions are welcome! Please feel free to submit issues or pull requests.
 
 ## 📄 License
 
