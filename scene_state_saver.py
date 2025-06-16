@@ -217,7 +217,7 @@ class ObjectCapture:
     @staticmethod
     def capture_object_data(obj: bpy.types.Object) -> Dict[str, Any]:
         """Capture transform and visibility data for a single object."""
-        return {
+        data = {
             "location": list(obj.location),
             "rotation_euler": list(obj.rotation_euler),
             "scale": list(obj.scale),
@@ -225,6 +225,42 @@ class ObjectCapture:
             "hide_render": obj.hide_render,
             "hide_set": obj.hide_get()  # Capture the actual hide_set() status
         }
+        
+        # Capture bone poses for armatures
+        if obj.type == 'ARMATURE' and obj.pose:
+            data["bone_poses"] = ObjectCapture.capture_bone_poses(obj)
+        
+        return data
+    
+    @staticmethod
+    def capture_bone_poses(armature_obj: bpy.types.Object) -> Dict[str, Dict[str, Any]]:
+        """Capture bone pose data for an armature object."""
+        if armature_obj.type != 'ARMATURE' or not armature_obj.pose:
+            return {}
+        
+        bone_data = {}
+        for pose_bone in armature_obj.pose.bones:
+            # Get the current rotation values based on the rotation mode
+            if pose_bone.rotation_mode == 'QUATERNION':
+                # For quaternion mode, use the quaternion values
+                current_quat = pose_bone.rotation_quaternion.copy()
+                # Convert to euler for backup
+                current_euler = current_quat.to_euler()
+            else:
+                # For euler modes, use the euler values
+                current_euler = pose_bone.rotation_euler.copy()
+                # Convert to quaternion for backup
+                current_quat = current_euler.to_quaternion()
+            
+            bone_data[pose_bone.name] = {
+                "location": list(pose_bone.location),
+                "rotation_euler": list(current_euler),
+                "rotation_quaternion": list(current_quat),
+                "scale": list(pose_bone.scale),
+                "rotation_mode": pose_bone.rotation_mode
+            }
+        
+        return bone_data
     
     @staticmethod
     def capture_all_objects() -> Dict[str, Dict[str, Any]]:
@@ -266,10 +302,50 @@ class ObjectCapture:
                 # Fallback for older states without hide_set data
                 obj.hide_set(hide_viewport)
             
+            # Apply bone poses for armatures
+            if obj.type == 'ARMATURE' and "bone_poses" in obj_data:
+                ObjectCapture.apply_bone_poses(obj, obj_data["bone_poses"])
+            
             return True
             
         except Exception as e:
             print(f"Error applying data to object {obj.name}: {e}")
+            return False
+    
+    @staticmethod
+    def apply_bone_poses(armature_obj: bpy.types.Object, bone_poses: Dict[str, Dict[str, Any]]) -> bool:
+        """Apply bone pose data to an armature object."""
+        if armature_obj.type != 'ARMATURE' or not armature_obj.pose:
+            return False
+        
+        try:
+            for bone_name, bone_data in bone_poses.items():
+                pose_bone = armature_obj.pose.bones.get(bone_name)
+                if pose_bone:
+                    # Apply transforms
+                    pose_bone.location = bone_data["location"]
+                    pose_bone.scale = bone_data["scale"]
+                    
+                    # Set rotation mode first, then apply rotation
+                    if "rotation_mode" in bone_data:
+                        target_mode = bone_data["rotation_mode"]
+                        pose_bone.rotation_mode = target_mode
+                        
+                        # Apply rotation based on the target mode
+                        if target_mode == 'QUATERNION':
+                            pose_bone.rotation_quaternion = bone_data["rotation_quaternion"]
+                        else:
+                            pose_bone.rotation_euler = bone_data["rotation_euler"]
+                    else:
+                        # Fallback: apply both and let Blender handle conversion
+                        pose_bone.rotation_euler = bone_data["rotation_euler"]
+                        if pose_bone.rotation_mode == 'QUATERNION':
+                            pose_bone.rotation_quaternion = bone_data["rotation_quaternion"]
+            
+            return True
+            
+        except Exception as e:
+            print(f"Error applying bone poses to {armature_obj.name}: {e}")
             return False
     
     @staticmethod
